@@ -290,3 +290,4 @@ $RECYCLE.BIN/
 
 # JetBrains IDE directory
 .idea/
+*Zone.Identifier

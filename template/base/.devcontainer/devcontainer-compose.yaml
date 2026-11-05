@@ -17,7 +17,6 @@ services:
     init: true
     working_dir: /workspaces/graded-containment
     environment:
-      CONTEXT7_API_KEY: 
       TZ: Europe/Vienna
       CODEX_HOME: /home/vscode/.codex
     extra_hosts:

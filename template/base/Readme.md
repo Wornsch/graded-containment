@@ -21,7 +21,7 @@ Describe the main parts of the application and their relations and interdependen
 
 The development environment is based on dev-env and provides a containerized
 Linux environment for VS Code with Python, Node, Docker access, PowerShell and 
-Codex with Context7.
+Codex with optional Context7 integration (off by default).
 
 Details regarding tooling and developer support can be found in `/_tooling/Readme.md`.
 

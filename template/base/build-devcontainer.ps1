@@ -68,10 +68,11 @@ function Invoke-DevContainerBootstrap {
     param($Checkout, [switch]$NoCache)
 
     <#
-    Check the host Context7 key before preparing files or resources.
+    Context7 is off by default; pass only its enabled state to the state helper.
     #>
-    if ([string]::IsNullOrWhiteSpace($env:CONTEXT7_API_KEY)) {
-        throw 'Set CONTEXT7_API_KEY in this Windows PowerShell environment before running bootstrap.'
+    $context7Enabled = -not [string]::IsNullOrEmpty($env:CONTEXT7_API_KEY)
+    if (-not $context7Enabled) {
+        Write-Host 'Context7 disabled: CONTEXT7_API_KEY not set'
     }
 
     <#
@@ -137,7 +138,7 @@ DevContainer build settings:
     Prepare persistent personal state without changing existing settings.
     #>
     $stateHelper = "$($Checkout.LinuxPath.TrimEnd('/'))/_tooling/devcontainer/prepare-state.sh"
-    Invoke-WslCommand $Checkout @('bash', $stateHelper, $personalDirectory)
+    Invoke-WslCommand $Checkout @('bash', $stateHelper, $personalDirectory, $context7Enabled.ToString().ToLowerInvariant())
 
     <#
     Create or reuse the external network shared with runtime containers.
@@ -153,6 +154,7 @@ DevContainer build settings:
     $npmArgument = if ($tools.Contains('npm')) {
         "`n        NPM_VERSION: $(ConvertTo-Json -InputObject $tools['npm'].Replace('$', '$$') -Compress)"
     } else { '' }
+    $context7Environment = if ($context7Enabled) { "`n      CONTEXT7_API_KEY: " } else { '' }
     $compose = @"
 # -----
 # Created by build-devcontainer.ps1 - do not modify manually!!!!
@@ -171,8 +173,7 @@ services:
     command: sleep infinity
     init: true
     working_dir: $workspace
-    environment:
-      CONTEXT7_API_KEY: 
+    environment:$context7Environment
       TZ: Europe/Vienna
       CODEX_HOME: /home/vscode/.codex
     extra_hosts:
@@ -227,7 +228,7 @@ if ($Help) {
     Write-Output @'
 Usage: .\build-devcontainer.ps1 [-WslPath <WSL UNC checkout>] [-NoCache] [-Help]
 Run in Windows PowerShell 7 after editing project.json.
-Set CONTEXT7_API_KEY in the environment first.
+Context7 is optional: set CONTEXT7_API_KEY in the environment to enable it.
 The script prepares the normal DevContainer files for later VS Code rebuilds.
 Uses devcontainer command on Windows PATH, otherwise npx -y @devcontainers/cli.
 Windows Node/npm is required only for the npx fallback.

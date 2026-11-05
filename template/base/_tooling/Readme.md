@@ -16,7 +16,8 @@
   described in the [official CLI guide](https://code.visualstudio.com/docs/devcontainers/devcontainer-cli).
 - Docker access for the Windows CLI runner. Windows and WSL Docker commands must
   address the same Linux engine; Docker Desktop WSL integration provides this setup.
-- Set `CONTEXT7_API_KEY` on the system where the container is built/run.
+- Context7 is optional and off by default. Set a non-empty `CONTEXT7_API_KEY` on the
+  system where bootstrap runs to enable it.
 
 ### Copy, configure and open
 
@@ -24,7 +25,7 @@
    filesystem path, which can either be accessed via UNC paths or mounted drive letters. Edit
    [project.json](../project.json) to set its name and tool versions.
 
-2. From Windows PowerShell 7 with `CONTEXT7_API_KEY` available, run:
+2. From Windows PowerShell 7, run:
 
    ```powershell
    Set-Location '\\wsl.localhost\Debian\work\project1'
@@ -55,8 +56,10 @@ The configured project name controls workspace/resource names. For `projectName:
   created/updated by `build-devcontainer.ps1`.
 - Docker-outside-of-Docker owns socket access and non-root permissions
 - The config uses Docker CE packages (`moby: false`) for Trixie compatibility.
-- Compose passes `CONTEXT7_API_KEY` directly from its host process into the container.
-  For VS Code rebuilds, the variable must be visible to the process running Compose.
+- Bootstrap includes the `CONTEXT7_API_KEY` environment entry only when its host
+  variable is non-empty; otherwise it omits the entry entirely. Rerun bootstrap
+  after changing whether Context7 is enabled. For VS Code rebuilds with Context7
+  enabled, the variable must be visible to the process running Compose.
 - The workspace joins its normal Compose network and the external shared runtime
   network. Bootstrap creates the latter if absent and reuses it thereafter; 
   runtime containers can join it; 
@@ -66,7 +69,10 @@ The configured project name controls workspace/resource names. For `projectName:
 - `-NoCache` rebuilds without cached layers. 
 - Codex CLI and extension share `$CODEX_HOME/config.toml`. Defaults are created only 
   when that file is missing; subsequent runs preserve all personal settings and MCP
-  entries.
+  entries. New configuration includes Context7 only when bootstrap has a non-empty
+  key. Existing configuration is never changed: previously saved Context7 entries
+  remain in the mounted state, and enabling Context7 later requires adding its MCP
+  entry manually if the configuration was initially created without it.
 
 ## Personal state
 
