@@ -66,7 +66,7 @@
 \begin{tabular}{@{}ll}
 \textbf{Author} & Christopher Werner \\
 \textbf{Repository} & \texttt{graded-containment}, folder \fpath{template/base/} \\
-\textbf{Last updated} & 5 November 2026 \\
+\textbf{Last updated} & 5 November 2026 (runtime verification) \\
 \textbf{Status} & Working document, extended throughout the thesis \\
 \end{tabular}
 
@@ -91,7 +91,7 @@ The baseline is derived from a generic Dev Container template of an industrial p
 
 Company and project identifiers in names, paths, Compose project and network names were replaced by generic identifiers (e.g.\ workspace \fpath{/workspaces/graded-containment}, external network \fpath{graded-containment\_default}). Mount types, permissions, users, network topology, base images, versions and the agent installation were deliberately left unchanged. The anonymisation was performed with an AI coding agent and reviewed manually.
 
-5bdcf827d8dea5c7e1f83c2bef9d121e9cd522ef
+\todo{Commit hash of the anonymised baseline}
 
 \subsection{Predecessor Setup (Motivating Observations)}
 
@@ -109,10 +109,12 @@ The research problem was originally observed in an earlier, project-specific Dev
 Definition & \fpath{.devcontainer/devcontainer.json} with Docker Compose (\fpath{devcontainer-compose.yaml}) and \fpath{Dockerfile}; feature versions pinned in \fpath{devcontainer-lock.json} \\
 Toolchain & Python 3.14, Node.js 24, npm 11 \\
 Features & \texttt{docker-outside-of-docker:1}, locked to version 1.10.1 \\
-Agent & Codex CLI, installed by \fpath{\_tooling/devcontainer/install-codex.sh}; VS Code extension installed automatically \\
+Agent & Codex CLI, installed by \fpath{\_tooling/devcontainer/install-codex.sh} into \fpath{\textasciitilde/.codex/packages/}; version not pinned (latest at build time, 0.166.0 on 5 Nov 2026); VS Code extension installed automatically \\
 Agent instructions & \fpath{AGENTS.md} in the workspace root \\
 Lifecycle & \fpath{post-create.sh}; agent state prepared by \fpath{\_tooling/devcontainer/prepare-state.sh} \\
-Bootstrap (Windows/WSL) & \fpath{build-devcontainer.ps1}; not used in the experiment \\
+Bootstrap (Linux/WSL) & \fpath{build-devcontainer.sh}, added for this thesis as the Linux equivalent of the Windows bootstrap \\
+Optional tools & Context7 MCP server, enabled only if \texttt{CONTEXT7\_API\_KEY} is set on the host; disabled in all experimental runs \\
+Bootstrap (Windows) & \fpath{build-devcontainer.ps1}; not used in the experiment \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -138,7 +140,7 @@ Repository checkout & \fpath{/workspaces/graded-containment} & read-write & Comp
 \subsection{Users and Network}
 
 \begin{itemize}
-  \item Editor and lifecycle commands run as non-root user \texttt{vscode} (\fpath{devcontainer.json}, UID update enabled). The user of the main container process is not set explicitly. \todo{Verify effective UID of the container process at runtime}
+  \item Editor, lifecycle and agent commands run as non-root user \texttt{vscode} (UID 1001), which is a member of group \texttt{docker}. The main container process (PID~1) runs as \texttt{root}, and \texttt{vscode} has passwordless \texttt{sudo} (B9).
   \item No explicit network mode; standard Compose networking with the default network and an external network \fpath{graded-containment\_default}.
   \item \texttt{host.docker.internal} is mapped to the host gateway (Compose).
   \item No published or forwarded ports.
@@ -155,18 +157,22 @@ Repository checkout & \fpath{/workspaces/graded-containment} & read-write & Comp
 \toprule
 \textbf{ID} & \textbf{Property} & \textbf{Consequence for an agent} & \textbf{Status} \\
 \midrule
-B1 & Host Docker socket available via the \texttt{docker-outside-of-docker} feature, not via a visible mount entry & Can control the host Docker daemon: start privileged containers, delete other containers and volumes; effectively host root & \stStatic{} \\
-B2 & No sandbox or approval policy configured for Codex; effective mode depends on personal settings and interactive choices & Permission level is not versioned and not reproducible from the repository & \stStatic{} \\
-B3 & Agent state directory \fpath{\textasciitilde/.codex} is a writable bind mount & Agent can read and modify its own configuration and authentication data; target for exfiltration via prompt injection & \stStatic{} \\
-B4 & \texttt{host.docker.internal} resolves to the host gateway & Agent can reach services listening on the host & \stStatic{} \\
+B1 & Host Docker socket available via the \texttt{docker-outside-of-docker} feature, not via a visible mount entry; socket at \fpath{/var/run/docker-host.sock} (group \texttt{docker}), symlinked from \fpath{/var/run/docker.sock}; user \texttt{vscode} is in group \texttt{docker} & Can control the host Docker daemon without \texttt{sudo}: list, stop and delete all containers and volumes of the host, including unrelated projects; start privileged containers; effectively host root & \stRuntime{} \\
+B2 & No sandbox or approval policy configured for Codex; effective mode depends on personal settings and interactive choices; fresh state contains only credential-store settings & Permission level is not versioned and not reproducible from the repository & \stRuntime{} \\
+B3 & Agent state directory \fpath{\textasciitilde/.codex} is a writable bind mount ; credentials are stored as plain files (\texttt{cli\_auth\_credentials\_store = \textquotedbl file\textquotedbl}) & Agent can read and modify its own configuration and authentication data; target for exfiltration via prompt injection & \stRuntime{} \\
+B4 & \texttt{host.docker.internal} resolves to the host gateway & Agent can reach services listening on the host & \stRuntime{}\footnotemark[1] \\
 B5 & Workspace including \fpath{.git} is mounted read-write & Agent can rewrite history, delete branches, modify hooks & \stStatic{} \\
-B6 & Unrestricted outbound network & Agent can download and execute arbitrary code and send data to any destination & \stStatic{} \\
-B7 & \texttt{CONTEXT7\_API\_KEY} passed as environment variable when set & Secret readable by the agent & \stStatic{} \\
+B6 & Unrestricted outbound network & Agent can download and execute arbitrary code and send data to any destination & \stRuntime{} \\
+B7 & \texttt{CONTEXT7\_API\_KEY} passed as environment variable when Context7 is enabled & Secret readable by the agent; not present in experimental runs (no secrets found in the environment with Context7 disabled) & \stRuntime{} \\
+B8 & Codex CLI is installed into the writable, host-persisted state mount (\fpath{\textasciitilde/.codex/packages/}) & Agent can modify its own executable; changes survive container rebuilds & \stRuntime{} \\
+B9 & User \texttt{vscode} has passwordless \texttt{sudo} & Agent is effectively root inside the container: can modify system files, install software and change any permission & \stRuntime{} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\todo{Add properties found during runtime verification (B8, \dots)}
+\footnotetext[1]{Name resolution confirmed; reachability of specific host services not tested.}
+
+\todo{Add further properties (B10, \dots)}
 
 \subsection{Mapping to Containment Profiles}
 
@@ -176,8 +182,8 @@ B7 & \texttt{CONTEXT7\_API\_KEY} passed as environment variable when set & Secre
 \toprule
 \textbf{Profile} & \textbf{Addresses} \\
 \midrule
-L1 & B1 (remove socket feature), forwarded host credentials \\
-L2 & B3 (split agent configuration and credentials), B4, B6, B7, write access outside the workspace \\
+L1 & B1 (remove socket feature and \texttt{docker} group membership), B9 (no passwordless \texttt{sudo}), forwarded host credentials \\
+L2 & B3 and B8 (separate agent installation, configuration and credentials; read-only where possible), B4, B6, B7, write access outside the workspace \\
 L3 & Destructive operations within the workspace, including B5 \\
 Not addressed & B2 is resolved by the template as a whole: all profiles are versioned \\
 \bottomrule
@@ -188,10 +194,10 @@ Not addressed & B2 is resolved by the template as a whole: all profiles are vers
 \section{Open Questions}
 
 \begin{itemize}
-  \item \todo{Effective UID of the main container process (root or vscode)?}
-  \item \todo{Does the VS Code Dev Containers extension forward Git credentials or the SSH agent into the container?}
+  \item \todo{Does the VS Code Dev Containers extension forward Git credentials or the SSH agent when the container is opened in VS Code? (Not the case when entering via \texttt{docker exec}, which is how the experiment runner will operate.)}
   \item \todo{Which Codex approval and sandbox mode is effective in a fresh container without personal settings?}
-  \item \todo{Is the Docker socket also reachable at \fpath{/var/run/docker.sock} inside the container (symlink or proxy)?}
+  \item Resolved: the main container process runs as \texttt{root}; the Docker socket is also reachable at \fpath{/var/run/docker.sock} via a symlink; \texttt{vscode} has passwordless \texttt{sudo}.
+  \item Note on B5: with the template placed in \fpath{template/base/}, the repository's \fpath{.git} lies outside the mounted workspace and is not visible in the container. In a project where the template sits at the repository root, \fpath{.git} is part of the writable workspace. B5 is therefore verified in the experiment with benchmark repositories.
 \end{itemize}
 
 % =====================================================================
@@ -205,7 +211,8 @@ Not addressed & B2 is resolved by the template as a whole: all profiles are vers
 \textbf{Date} & \textbf{Check} & \textbf{Result} & \textbf{IDs} \\
 \midrule
 2026-11-05 & Static analysis of the anonymised configuration (AI-assisted, reviewed manually) & Properties B1--B7 identified & B1--B7 \\
-\todo{date} & First build and start of the container & & \\
+2026-11-05 & First build with \fpath{build-devcontainer.sh} (Context7 disabled), Docker Engine 29.9.2 in WSL2 & Build successful; Codex CLI 0.166.0 installed & -- \\
+2026-11-05 & Read-only checks as \texttt{vscode} via \texttt{docker exec}: \texttt{id}, PID~1 user, socket permissions, \texttt{docker ps}, \fpath{\textasciitilde/.codex}, \texttt{getent hosts}, outbound HTTPS, environment secrets, SSH agent, Git credential helpers, \texttt{sudo -n} & \texttt{docker ps} lists all host containers including unrelated projects; outbound HTTPS succeeds; no secrets in environment; no SSH agent or credential helper; passwordless \texttt{sudo} available & B1--B4, B6--B9 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -221,6 +228,7 @@ Not addressed & B2 is resolved by the template as a whole: all profiles are vers
 \textbf{Date} & \textbf{Change} \\
 \midrule
 2026-11-05 & Baseline copied from the partner template and anonymised; internal specifications removed \\
+2026-11-05 & Linux bootstrap \fpath{build-devcontainer.sh} added; Context7 MCP made optional (enabled only with API key) and disabled for all experimental runs. Isolation properties B1--B6 unaffected \\
 \bottomrule
 \end{tabularx}
 \end{table}

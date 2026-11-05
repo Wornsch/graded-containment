@@ -1,5 +1,5 @@
 # -----
-# Created by build-devcontainer.ps1 - do not modify manually!!!!
+# Created by build-devcontainer.sh - do not modify manually!!!!
 # Edit project.json or the script's template.
 # -----
 name: graded-containment_devc
