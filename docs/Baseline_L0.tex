@@ -1,0 +1,228 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{charter}
+\usepackage[scaled=0.92]{helvet}
+\usepackage[margin=2.4cm,top=2.6cm,bottom=2.6cm]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{tuaccent}{RGB}{0,102,153}
+\definecolor{muted}{RGB}{100,100,100}
+\definecolor{todo}{RGB}{190,90,0}
+
+\titleformat{\section}{\sffamily\large\bfseries\color{tuaccent}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\sffamily\normalsize\bfseries}{\thesubsection}{0.8em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+\titlespacing*{\subsection}{0pt}{1em}{0.3em}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\setlist{itemsep=0.15em,topsep=0.3em,leftmargin=1.4em}
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\sffamily\footnotesize\color{muted}Baseline Documentation (L0) \textendash{} Working Document}
+\fancyhead[R]{\sffamily\footnotesize\color{muted}C.~Werner, TU Wien}
+\fancyfoot[C]{\sffamily\footnotesize\color{muted}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---------- Helpers for a living document ----------
+% Status markers for findings
+\newcommand{\stStatic}{\textsf{\small static}}
+\newcommand{\stRuntime}{\textsf{\small runtime}}
+\newcommand{\stPending}{\textsf{\small\color{todo} pending}}
+% Open item marker
+\newcommand{\todo}[1]{{\color{todo}\textsf{\small [TODO: #1]}}}
+\newcommand{\fpath}[1]{\texttt{#1}}
+
+\begin{document}
+
+% ---------- Title block ----------
+\thispagestyle{plain}
+{\sffamily\footnotesize\color{muted}TU Wien \textbullet{} Bachelor Thesis \textbullet{} Graded Containment for Autonomous Coding Agents}
+
+\vspace{1.2em}
+{\sffamily\LARGE\bfseries Baseline Documentation: Profile L0}
+
+\vspace{0.3em}
+{\sffamily\large Configuration, security-relevant properties and verification log}
+
+\vspace{1em}
+{\color{tuaccent}\rule{\linewidth}{1pt}}
+
+\vspace{0.2em}
+\begin{tabular}{@{}ll}
+\textbf{Author} & Christopher Werner \\
+\textbf{Repository} & \texttt{graded-containment}, folder \fpath{template/base/} \\
+\textbf{Last updated} & 5 November 2026 \\
+\textbf{Status} & Working document, extended throughout the thesis \\
+\end{tabular}
+
+\vspace{0.6em}
+{\color{tuaccent}\rule{\linewidth}{0.4pt}}
+
+\textbf{How to maintain this document.} Every security-relevant property gets an ID (B1, B2, \dots) in Section~\ref{sec:findings} and keeps it. Each property records its evidence and a status: \stStatic{} (derived from configuration files), \stRuntime{} (confirmed in a running container), or \stPending{}. Every check that is performed is added to the verification log (Section~\ref{sec:log}), and every change to the baseline itself goes into the changelog (Section~\ref{sec:changelog}). File references are relative to \fpath{template/base/} and refer to the anonymised version.
+
+% =====================================================================
+\section{Purpose and Scope}
+
+Profile L0 is the uncontained reference configuration of the experiment. It reproduces a Dev Container setup as used in industrial practice, without additional hardening. All other profiles (L1--L3) are defined as changes relative to L0, and all experimental results are compared against it. L0 must therefore be documented precisely and must not change once the experiment starts.
+
+% =====================================================================
+\section{Origin}
+
+\subsection{Source}
+
+The baseline is derived from a generic Dev Container template of an industrial partner (version as of November 2026). Only the Dev Container definition, its tooling scripts, the agent instructions (\fpath{AGENTS.md}) and the Windows/WSL bootstrap script were taken over; internal specifications and project code were excluded. The copy contains no version history.
+
+\subsection{Anonymisation}
+
+Company and project identifiers in names, paths, Compose project and network names were replaced by generic identifiers (e.g.\ workspace \fpath{/workspaces/graded-containment}, external network \fpath{graded-containment\_default}). Mount types, permissions, users, network topology, base images, versions and the agent installation were deliberately left unchanged. The anonymisation was performed with an AI coding agent and reviewed manually.
+
+\todo{Commit hash of the anonymised baseline}
+
+\subsection{Predecessor Setup (Motivating Observations)}
+
+The research problem was originally observed in an earlier, project-specific Dev Container of the same partner (Codex CLI 0.152.1, VS Code extension in mode ``Approve for me''). In that setup the agent executed \texttt{touch \textasciitilde/probe.txt} and \texttt{docker ps} without any approval prompt, and \texttt{docker ps} listed the agent's own container, confirming access to the host Docker daemon. The current baseline is the successor template; the observations are kept here because they motivate the thesis.
+
+% =====================================================================
+\section{Configuration Overview}
+
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.6cm}L@{}}
+\toprule
+\textbf{Aspect} & \textbf{Configuration} \\
+\midrule
+Definition & \fpath{.devcontainer/devcontainer.json} with Docker Compose (\fpath{devcontainer-compose.yaml}) and \fpath{Dockerfile}; feature versions pinned in \fpath{devcontainer-lock.json} \\
+Toolchain & Python 3.14, Node.js 24, npm 11 \\
+Features & \texttt{docker-outside-of-docker:1}, locked to version 1.10.1 \\
+Agent & Codex CLI, installed by \fpath{\_tooling/devcontainer/install-codex.sh}; VS Code extension installed automatically \\
+Agent instructions & \fpath{AGENTS.md} in the workspace root \\
+Lifecycle & \fpath{post-create.sh}; agent state prepared by \fpath{\_tooling/devcontainer/prepare-state.sh} \\
+Bootstrap (Windows/WSL) & \fpath{build-devcontainer.ps1}; not used in the experiment \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Mounts}
+
+\begin{table}[H]
+\small
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}p{4.6cm}p{5.4cm}p{1.6cm}L@{}}
+\toprule
+\textbf{Host source} & \textbf{Container target} & \textbf{Mode} & \textbf{Defined in} \\
+\midrule
+Repository checkout & \fpath{/workspaces/graded-containment} & read-write & Compose \\
+\fpath{.local/devcontainer/vscode} & \fpath{/home/vscode/.vscode-server} & read-write & Compose \\
+\fpath{.local/devcontainer/}\allowbreak\fpath{vscode-insiders} & \fpath{/home/vscode/}\allowbreak\fpath{.vscode-server-insiders} & read-write & Compose \\
+\fpath{.local/devcontainer/codex} & \fpath{/home/vscode/.codex} & read-write & Compose \\
+\fpath{/var/run/docker.sock} & \fpath{/var/run/docker-host.sock} & read-write & Feature (B1) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Users and Network}
+
+\begin{itemize}
+  \item Editor and lifecycle commands run as non-root user \texttt{vscode} (\fpath{devcontainer.json}, UID update enabled). The user of the main container process is not set explicitly. \todo{Verify effective UID of the container process at runtime}
+  \item No explicit network mode; standard Compose networking with the default network and an external network \fpath{graded-containment\_default}.
+  \item \texttt{host.docker.internal} is mapped to the host gateway (Compose).
+  \item No published or forwarded ports.
+  \item Outbound network access is unrestricted.
+\end{itemize}
+
+% =====================================================================
+\section{Security-Relevant Properties}
+\label{sec:findings}
+
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}p{0.7cm}LLp{1.5cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Property} & \textbf{Consequence for an agent} & \textbf{Status} \\
+\midrule
+B1 & Host Docker socket available via the \texttt{docker-outside-of-docker} feature, not via a visible mount entry & Can control the host Docker daemon: start privileged containers, delete other containers and volumes; effectively host root & \stStatic{} \\
+B2 & No sandbox or approval policy configured for Codex; effective mode depends on personal settings and interactive choices & Permission level is not versioned and not reproducible from the repository & \stStatic{} \\
+B3 & Agent state directory \fpath{\textasciitilde/.codex} is a writable bind mount & Agent can read and modify its own configuration and authentication data; target for exfiltration via prompt injection & \stStatic{} \\
+B4 & \texttt{host.docker.internal} resolves to the host gateway & Agent can reach services listening on the host & \stStatic{} \\
+B5 & Workspace including \fpath{.git} is mounted read-write & Agent can rewrite history, delete branches, modify hooks & \stStatic{} \\
+B6 & Unrestricted outbound network & Agent can download and execute arbitrary code and send data to any destination & \stStatic{} \\
+B7 & \texttt{CONTEXT7\_API\_KEY} passed as environment variable when set & Secret readable by the agent & \stStatic{} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\todo{Add properties found during runtime verification (B8, \dots)}
+
+\subsection{Mapping to Containment Profiles}
+
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}p{2.6cm}L@{}}
+\toprule
+\textbf{Profile} & \textbf{Addresses} \\
+\midrule
+L1 & B1 (remove socket feature), forwarded host credentials \\
+L2 & B3 (split agent configuration and credentials), B4, B6, B7, write access outside the workspace \\
+L3 & Destructive operations within the workspace, including B5 \\
+Not addressed & B2 is resolved by the template as a whole: all profiles are versioned \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% =====================================================================
+\section{Open Questions}
+
+\begin{itemize}
+  \item \todo{Effective UID of the main container process (root or vscode)?}
+  \item \todo{Does the VS Code Dev Containers extension forward Git credentials or the SSH agent into the container?}
+  \item \todo{Which Codex approval and sandbox mode is effective in a fresh container without personal settings?}
+  \item \todo{Is the Docker socket also reachable at \fpath{/var/run/docker.sock} inside the container (symlink or proxy)?}
+\end{itemize}
+
+% =====================================================================
+\section{Verification Log}
+\label{sec:log}
+
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}p{2cm}LLp{1.2cm}@{}}
+\toprule
+\textbf{Date} & \textbf{Check} & \textbf{Result} & \textbf{IDs} \\
+\midrule
+2026-11-05 & Static analysis of the anonymised configuration (AI-assisted, reviewed manually) & Properties B1--B7 identified & B1--B7 \\
+\todo{date} & First build and start of the container & & \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% =====================================================================
+\section{Changelog}
+\label{sec:changelog}
+
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}p{2cm}L@{}}
+\toprule
+\textbf{Date} & \textbf{Change} \\
+\midrule
+2026-11-05 & Baseline copied from the partner template and anonymised; internal specifications removed \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\end{document}
