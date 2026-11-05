@@ -1,0 +1,48 @@
+# -----
+# Created by build-devcontainer.ps1 - do not modify manually!!!!
+# Edit project.json or the script's template.
+# -----
+name: graded-containment_devc
+services:
+  workspace:
+    image: graded-containment_build_devcontainer:local
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        PYTHON_VERSION: "3.14"
+        NODE_VERSION: "24"
+        NPM_VERSION: "11"
+    command: sleep infinity
+    init: true
+    working_dir: /workspaces/graded-containment
+    environment:
+      CONTEXT7_API_KEY: 
+      TZ: Europe/Vienna
+      CODEX_HOME: /home/vscode/.codex
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - default
+      - project_default
+    volumes:
+      - type: bind
+        source: ..
+        target: /workspaces/graded-containment
+        bind: { create_host_path: false }
+      - type: bind
+        source: ../.local/devcontainer/vscode
+        target: /home/vscode/.vscode-server
+        bind: { create_host_path: false }
+      - type: bind
+        source: ../.local/devcontainer/vscode-insiders
+        target: /home/vscode/.vscode-server-insiders
+        bind: { create_host_path: false }
+      - type: bind
+        source: ../.local/devcontainer/codex
+        target: /home/vscode/.codex
+        bind: { create_host_path: false }
+networks:
+  project_default:
+    external: true
+    name: graded-containment_default

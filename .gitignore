@@ -218,3 +218,75 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Private configuration, authentication, and local state (at any component depth)
+.local/
+.aws/
+.codex/
+.agents/
+.ssh/
+.iectl/
+
+# Keep only explicitly public dotenv examples/templates.
+.env.*
+!.env.example
+!.env.*.example
+!.env.local.template
+
+### generic language/tool specific exclusions
+# Node
+node_modules/
+
+# Runtime data
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Framework build output and caches
+.parcel-cache
+.next
+out/
+.nuxt
+
+# npm cache directory
+.npm
+*.tgz
+
+# Virtual environments
+.venv-windows/
+venv-windows/
+
+# Development integration evidence
+e2e-artifacts/
+
+# Windows thumbnail cache files
+Thumbs.db
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Backup files
+*~
+
+# Temporary files from deleted open files
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder
+.Trash-*
+
+# NFS temporary files
+.nfs*
+
+# JetBrains IDE directory
+.idea/

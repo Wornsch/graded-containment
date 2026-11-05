@@ -1,0 +1,59 @@
+# Real dotenv files; allow only explicitly public examples/templates.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+!**/.env.local.template
+
+# Repository/editor metadata
+**/.git
+**/.idea
+
+# Python environments, caches, packages, and reports
+**/.venv
+**/.venv-windows
+**/venv-windows
+**/venv
+**/env
+**/__pycache__
+**/*.py[cod]
+**/*.so
+**/*.egg-info
+**/*.egg
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.tox
+**/.nox
+**/.coverage
+**/.coverage.*
+**/htmlcov
+
+# Node dependencies, caches, bundles, and reports
+**/node_modules
+**/.npm
+**/.cache
+**/.parcel-cache
+**/.next
+**/.nuxt
+**/.nyc_output
+**/*.tsbuildinfo
+**/coverage
+**/*.lcov
+**/build
+**/dist
+**/out
+**/e2e-artifacts
+**/*.log
+**/*.pid
+**/*.pid.lock
+**/*.tgz
+**/*~
+
+# Keep private directories last so public-file exceptions cannot reinclude state.
+**/.local
+**/.aws
+**/.codex
+**/.agents
+**/.ssh
+**/.iectl
