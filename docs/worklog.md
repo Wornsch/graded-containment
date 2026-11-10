@@ -39,3 +39,8 @@
 - What: Merged related history into eight dated entries using What, Why and Result.
 - Why: Keep the work log focused on meaningful steps and supported facts.
 - Result: Format and chronology checked; only the work log changed; no Docker commands run.
+
+## 2026-11-10 – SWE-bench harness smoke test
+- What: Pinned SWE-bench harness 5.0.2 and pulled prebuilt images from Docker Hub.
+- Why: Verify the harness with gold patches before experimental runs.
+- Result: Gold smoke test resolved sympy-20590 and django-11099 (2/2) in 1m54s; images used about 4 GB per instance.
