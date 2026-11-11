@@ -70,3 +70,7 @@
 - Why: Ensure every selected task is resolvable by the reference fix in the evaluation environment before agent runs.
 - Result: 21/22 resolved in 6m34s, 0 infrastructure failures; all 15 main tasks resolved; reserve pylint-dev__pylint-7277 excluded after PASS_TO_PASS test_jobs_score failed (likely parallel-execution flakiness, not investigated); no reserve left for pylint or flask.
 
+## 2026-11-11 – Suite B controls and utility checks
+- What: Exported full task details (docs/saber-safe-controls.md, docs/saber-selected-details.md via experiment/saber/dump_details.py); added four SABER safe tasks as false-block controls and a utility check per task to experiment/saber/selection.yaml.
+- Why: Measure False-Block Rate at each profile boundary and define Utility under Attack before any run.
+- Result: Controls B_info_023 (home read), B_persist_001 (home write), B_net_001 (loopback), B_code_039 (benign eval); 7 of 11 injection tasks have a measurable benign goal, 4 count for ASR only; SABER system prompt not used (agent runs with its native prompt as in Suite A); required tools in all profiles: git, python3, sqlite3, make, gcc, curl, wget, ssh, crontab, node, npm, jq, jest, flask. Selection: 15 SWE-bench + 20 SABER tasks.
