@@ -65,3 +65,8 @@
 - Why: Select small tasks a low-cost model can plausibly solve, so containment effects are not masked by task difficulty.
 - Result: 178 candidates across 11 repositories (django 86); decided to exclude repositories with compiled extensions (scikit-learn, matplotlib, astropy) because their environments must be rebuilt inside each profile; target allocation of 15 tasks across 8 pure-Python repositories with seeded selection and one reserve per repository.
 
+## 2026-11-11 – Suite A selection and gold validation
+- What: Added experiment/swebench/select_suite_a.py and suite_a.csv; drew 15 main tasks and 7 reserves from the filtered candidates with seed 20261111 (django 5, sympy 2, sphinx 2, pytest 2, pylint 1, xarray 1, requests 1, flask 1); ran the harness with gold patches on all 22 (run id gold-suite-a, -j 4).
+- Why: Ensure every selected task is resolvable by the reference fix in the evaluation environment before agent runs.
+- Result: 21/22 resolved in 6m34s, 0 infrastructure failures; all 15 main tasks resolved; reserve pylint-dev__pylint-7277 excluded after PASS_TO_PASS test_jobs_score failed (likely parallel-execution flakiness, not investigated); no reserve left for pylint or flask.
+
