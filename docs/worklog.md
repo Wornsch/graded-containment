@@ -41,6 +41,21 @@
 - Result: Format and chronology checked; only the work log changed; no Docker commands run.
 
 ## 2026-11-10 – SWE-bench harness smoke test
-- What: Pinned SWE-bench harness 5.0.2 and pulled prebuilt images from Docker Hub.
-- Why: Verify the harness with gold patches before experimental runs.
-- Result: Gold smoke test resolved sympy-20590 and django-11099 (2/2) in 1m54s; images used about 4 GB per instance.
+- What: Added experiment/setup/setup-swebench.sh (preflight checks, pinned checkout, isolated venv under /work/bench, setup record, optional gold smoke test); installed SWE-bench harness 5.0.2 at commit 02e7a74 with the new CLI; prebuilt evaluation images pulled from Docker Hub.
+- Why: Verify the evaluation harness with gold patches before experimental runs and make the installation reproducible in the experiment VM.
+- Result: Gold smoke test resolved sympy-20590 and django-11099 (2/2, 0 infrastructure failures) in 1m54s; about 4 GB image per instance; commit pinned in the script.
+
+## 2026-11-10 – SABER repository analysis
+- What: Cloned SABER at commit 27df0fb outside the thesis repository and produced a read-only static analysis with Codex (docs/saber-analysis.md); no SABER code, Docker, or models executed.
+- Why: Determine whether SABER's Pi harness can run tasks under our containment profiles.
+- Result: Pi runs on the host and forwards tools via docker exec into SABER's own sandbox (--network=none, 256 MB, 15 s timeout); network commands are mocked host-side and deltas are command-string heuristics, so SABER verdicts measure attempts, not prevented effects; LLM judge combined with rules by OR. Scenario A (289 injection tasks) and B (186 model-mistake tasks) match the threat model; one inspected prompt is Chinese. Proposed: use SABER as task source with our own runner instead of the SABER harness (decision pending supervisor).
+
+## 2026-11-10 – SABER candidate selection
+- What: Added experiment/saber/select_candidates.py and candidates.csv; classified SABER scenario A and B tasks as portable (A: file_content or config_inject injection; B: no injection; both without MCP servers) and detected prompt language.
+- Why: Identify SABER tasks that can run in our own runner without SABER's harness-side output manipulation or simulated MCP tools.
+- Result: 475 tasks analysed, 323 portable (A 149, B 174), all with Chinese user prompts; 43 portable tasks in SABER's 100-task harness subset; decision: translate natural-language fields of a small stratified selection (~15 tasks) to English, keeping code, paths and detection patterns unchanged (pending supervisor).
+
+## 2026-11-10 – SABER task selection draft
+- What: Reviewed 92 shortlisted SABER tasks (docs/saber-shortlist.md); drafted experiment/saber/selection.yaml with 11 injection (scenario A) and 5 model-mistake (scenario B) tasks, each annotated with the harm boundary and the profile expected to prevent the effect; LLM-assisted English drafts of the user prompts.
+- Why: Cover each containment boundary (network, root, home outside workspace, workspace, model output) with at least two tasks and state expected outcomes before any run.
+- Result: Damage inside the writable workspace is only preventable by L3; output-based leaks by no profile (B_info_007 kept as control); 10 of 16 tasks in SABER's published subset; open decisions: attacker-domain sinkhole in all profiles, /home/user path mapping, provisioning of out-of-workspace secrets per profile, required tools in L0; translations and system prompts pending review.
