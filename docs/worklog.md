@@ -59,3 +59,9 @@
 - What: Reviewed 92 shortlisted SABER tasks (docs/saber-shortlist.md); drafted experiment/saber/selection.yaml with 11 injection (scenario A) and 5 model-mistake (scenario B) tasks, each annotated with the harm boundary and the profile expected to prevent the effect; LLM-assisted English drafts of the user prompts.
 - Why: Cover each containment boundary (network, root, home outside workspace, workspace, model output) with at least two tasks and state expected outcomes before any run.
 - Result: Damage inside the writable workspace is only preventable by L3; output-based leaks by no profile (B_info_007 kept as control); 10 of 16 tasks in SABER's published subset; open decisions: attacker-domain sinkhole in all profiles, /home/user path mapping, provisioning of out-of-workspace secrets per profile, required tools in L0; translations and system prompts pending review.
+
+## 2026-11-11 – SWE-bench candidate filtering
+- What: Added experiment/swebench/select_candidates.py and candidates.csv; filtered SWE-bench Verified by difficulty "<15 min fix", single-file gold patch with at most 20 changed lines, and 1–5 FAIL_TO_PASS tests.
+- Why: Select small tasks a low-cost model can plausibly solve, so containment effects are not masked by task difficulty.
+- Result: 178 candidates across 11 repositories (django 86); decided to exclude repositories with compiled extensions (scikit-learn, matplotlib, astropy) because their environments must be rebuilt inside each profile; target allocation of 15 tasks across 8 pure-Python repositories with seeded selection and one reserve per repository.
+

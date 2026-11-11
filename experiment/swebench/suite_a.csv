@@ -1,0 +1,63 @@
+instance_id,repo,version,role,n_fail_to_pass,n_pass_to_pass,patch_lines,problem_statement_preview
+django__django-15104,django/django,4.1,main,1,131,2,"KeyError with migration autodetector and FK field with hardcoded reference
+Description
+	
+Hi,
+I encou"
+django__django-13417,django/django,3.2,main,2,280,7,"QuerySet.ordered property is incorrect for GROUP BY queries on models with Meta.ordering.
+Descriptio"
+django__django-14493,django/django,4.0,main,1,36,1,"ManifestStaticFilesStorage crashes with max_post_process_passes = 0.
+Description
+	
+To reproduce:
+Der"
+django__django-12193,django/django,3.1,main,1,11,4,"SplitArrayField with BooleanField always has widgets checked after the first True value.
+Description"
+django__django-15277,django/django,4.1,main,2,158,3,"Micro-optimisation for Value._resolve_output_field (by modifying CharField.__init__)
+Description
+	
+C"
+sympy__sympy-21847,sympy/sympy,1.9,main,1,9,4,"itermonomials returns incorrect monomials when using min_degrees argument
+`itermonomials` returns in"
+sympy__sympy-19954,sympy/sympy,1.7,main,1,56,9,"sylow_subgroup() IndexError 
+I use sympy 1.6.1, with numpy 1.18.5, scipy 1.4.1, under Python '3.8.5 "
+sphinx-doc__sphinx-7889,sphinx-doc/sphinx,3.2,main,1,5,4,"Autodoc extension's mock file throws TypeError for generic-typed classes.
+**Describe the bug**
+When"
+sphinx-doc__sphinx-10449,sphinx-doc/sphinx,5.1,main,1,30,12,"`autodoc_typehints = ""description""` causes autoclass to put a return type
+### Describe the bug
+
+Us"
+pytest-dev__pytest-6202,pytest-dev/pytest,5.2,main,1,72,3,"'.['  replaced with '[' in the headline shown of the test report
+```
+bug.py F                      "
+pytest-dev__pytest-7982,pytest-dev/pytest,6.2,main,1,78,2,"Symlinked directories not collected since pytest 6.1.0
+When there is a symlink to a directory in a t"
+pylint-dev__pylint-4970,pylint-dev/pylint,2.10,main,1,17,2,"Setting `min-similarity-lines` to `0` should stop pylint from checking duplicate code
+### Current pr"
+pydata__xarray-4629,pydata/xarray,0.12,main,1,32,2,merge(combine_attrs='override') does not copy attrs but instead references attrs from the first obje
+psf__requests-5414,psf/requests,2.26,main,1,130,2,"Getting http://.example.com raises UnicodeError
+Attempting to get e.g. `http://.example.com` results"
+pallets__flask-5014,pallets/flask,2.3,main,1,59,3,"Require a non-empty name for Blueprints
+Things do not work correctly if a Blueprint is given an empt"
+django__django-14373,django/django,4.0,reserve,1,19,4,"DateFormat.Y() is not zero-padded.
+Description
+	
+The Y specifier for django.utils.dateformat.DateFor"
+sympy__sympy-13480,sympy/sympy,1.1,reserve,1,43,2,".subs on coth(log(tan(x))) errors for certain integral values
+    >>> from sympy import *
+    >>> x"
+sphinx-doc__sphinx-10435,sphinx-doc/sphinx,5.0,reserve,1,74,6,"LaTeX: new Inline code highlighting from #10251 adds whitespace at start and end in pdf output
+### D"
+pytest-dev__pytest-5809,pytest-dev/pytest,4.6,reserve,1,3,6,"Lexer ""python3"" in --pastebin feature causes HTTP errors
+The `--pastebin` option currently submits t"
+pylint-dev__pylint-7277,pylint-dev/pylint,2.15,reserve,1,122,5,"`pylint` removes first item from `sys.path` when running from `runpy`.
+### Bug description
+
+This is "
+pydata__xarray-4075,pydata/xarray,0.12,reserve,2,958,9,"[bug] when passing boolean weights to weighted mean
+<!-- A short summary of the issue, if appropriat"
+psf__requests-1142,psf/requests,1.1,reserve,1,5,3,"requests.get is ALWAYS sending content length
+Hi,
+
+It seems like that request.get always adds 'conte"
