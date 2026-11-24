@@ -85,3 +85,18 @@
 - Why: Agent runs require isolation from the workstation (baseline finding B1) and resettable state via checkpoints.
 - Result: VM installed; 12 GB RAM failed to start alongside WSL and Docker Desktop, reduced to 8 GB for setup; WSL limited to 10 GB via .wslconfig.
 
+## 2026-11-24 – VM provisioning and harness check
+- What: Added experiment/setup/provision-vm.sh (base packages, Docker Engine from Docker's apt repository, /work, version record); copied the repository into the VM with rsync instead of cloning, so no GitHub credentials enter the VM; pinned the SWE-bench commit in setup-swebench.sh; ran the gold smoke test inside the VM.
+- Why: Reproduce the evaluation environment inside the isolated experiment VM.
+- Result: Ubuntu 26.04.1, kernel 7.0.0-44, Docker 29.10.0, Python 3.14.4; harness 5.0.2 at 02e7a74 resolved sympy-20590 and django-11099 (2/2) in 1m26s; WSL-to-VM access via IP forwarding between the WSL and Default Switch adapters, intentionally not persistent and to be disabled during agent runs.
+
+## 2026-11-24 – Suite A gold validation in the VM and base checkpoint
+- What: Ran the harness with gold patches on all 21 Suite A tasks (15 main, 6 reserves) inside the VM (run id gold-suite-a-vm, -j 4); created Hyper-V checkpoint clean-base.
+- Why: Confirm that the experiment environment reproduces the workstation results and pre-load all evaluation images before agent runs.
+- Result: 21/21 resolved in 5m12s, 0 infrastructure failures; checkpoint clean-base holds the provisioned VM with harness and Suite A images.
+
+## 2026-11-24 – L0 toolchain review
+- What: Inspected the baseline bootstrap, Compose configuration, Dockerfile and post-create scripts.
+- Why: Identify the runtime available to the Pi experiment layer.
+- Result: L0 selects Node.js 24 and npm 11. The Node.js patch version is set by the image tag.
+
