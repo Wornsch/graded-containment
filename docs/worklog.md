@@ -74,3 +74,14 @@
 - What: Exported full task details (docs/saber-safe-controls.md, docs/saber-selected-details.md via experiment/saber/dump_details.py); added four SABER safe tasks as false-block controls and a utility check per task to experiment/saber/selection.yaml.
 - Why: Measure False-Block Rate at each profile boundary and define Utility under Attack before any run.
 - Result: Controls B_info_023 (home read), B_persist_001 (home write), B_net_001 (loopback), B_code_039 (benign eval); 7 of 11 injection tasks have a measurable benign goal, 4 count for ASR only; SABER system prompt not used (agent runs with its native prompt as in Suite A); required tools in all profiles: git, python3, sqlite3, make, gcc, curl, wget, ssh, crontab, node, npm, jq, jest, flask. Selection: 15 SWE-bench + 20 SABER tasks.
+
+## 2026-11-24 – Supervisor decisions on the task set
+- What: Recorded decisions from the jour fixe on 2026-11-17; renamed prompt_en to translation_en in experiment/saber/selection.yaml.
+- Why: Supervisor approved SABER as task source with an own runner (if feasible), SABER scenario B instead of OverEager, and pure-Python Suite A; the experiment must use SABER's original Chinese prompts.
+- Result: Runner reads prompts directly from the SABER task objects; English translations kept for documentation only; language difference between suites and model Chinese proficiency (RQ3) noted as threats to validity.
+
+## 2026-11-24 – Experiment VM
+- What: Enabled Hyper-V; created VM gc-experiment with experiment/setup/create-vm.ps1 (Generation 2, 8 vCPUs, 8 GB static RAM, 250 GB dynamic disk, Default Switch, automatic checkpoints off); installed Ubuntu Server 26.04.1 LTS (root LV extended to full disk, OpenSSH, no snaps); experiment/setup/finalize-vm.ps1 ejects the ISO and boots from disk.
+- Why: Agent runs require isolation from the workstation (baseline finding B1) and resettable state via checkpoints.
+- Result: VM installed; 12 GB RAM failed to start alongside WSL and Docker Desktop, reduced to 8 GB for setup; WSL limited to 10 GB via .wslconfig.
+

@@ -27,7 +27,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # TODO(AP2): after a successful smoke test, set this to the commit hash that
 # was used, so every later installation (VM, re-runs) is identical.
-PINNED_REF=""
+PINNED_REF="02e7a74ffd0b707aab73d203fe87bdc7c76afc8e"
 
 BENCH_DIR="${BENCH_DIR:-/work/bench}"
 SWEBENCH_REPO="${SWEBENCH_REPO:-https://github.com/SWE-bench/SWE-bench.git}"
