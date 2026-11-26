@@ -120,3 +120,8 @@
 - Why: Make L0 startup repeatable in the experiment VM.
 - Result: Bash syntax and version record deduplication passed. VM installation and L0 startup were not tested.
 
+## 2026-11-26 – L0 and Pi in the experiment VM
+- What: Ran setup-devcontainer-cli.sh in the VM, started L0 with build-devcontainer.sh (CONTEXT7_API_KEY unset), and ran install-pi.sh twice in the workspace container as vscode.
+- Why: The agent must run inside the unmodified L0 baseline in the isolated VM.
+- Result: VM has Node.js 24.22.3, npm 11.19.1 and Dev Containers CLI 0.91.0; the workspace service is running. Pi 1.6.0 installed; the second run was a no-op; no ~/.pi state was created. The L0 workspace mount is /workspaces/graded-containment (the experiment repo, without .git in the VM copy), so task runs need a separate per-task workspace.
+
