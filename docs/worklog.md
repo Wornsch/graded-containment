@@ -110,3 +110,13 @@
 - Why: Verify installation, repeatability, and clear errors without starting an agent session.
 - Result: Both runs reported Pi 1.6.0. The old Node.js version was rejected, no Pi state or workspace files were created, and L0 execution was not tested.
 
+## 2026-11-26 – L0 host tooling review
+- What: Traced the Linux launcher and checked the official Node.js release and the npm version of the Dev Containers CLI.
+- Why: Pin the VM tooling used to start L0 through the original launcher.
+- Result: The Node.js 24.22.3 archive passed checksum verification. Its npm 11.19.1 installed Dev Containers CLI 0.91.0 with lifecycle scripts disabled in a temporary directory.
+
+## 2026-11-26 – L0 VM host setup
+- What: Added the pinned host installer and documented how to start and verify the workspace.
+- Why: Make L0 startup repeatable in the experiment VM.
+- Result: Bash syntax and version record deduplication passed. VM installation and L0 startup were not tested.
+
