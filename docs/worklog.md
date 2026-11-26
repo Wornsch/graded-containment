@@ -100,3 +100,13 @@
 - Why: Identify the runtime available to the Pi experiment layer.
 - Result: L0 selects Node.js 24 and npm 11. The Node.js patch version is set by the image tag.
 
+## 2026-11-24 – Pinned Pi installer
+- What: Checked the npm release and its packaged documentation, then added a user-level installer and setup guide.
+- Why: Install Pi as an experiment layer on the existing L0 container.
+- Result: Pinned Pi 1.6.0 with a Node.js 22.19.0 minimum and set the documented startup network and telemetry controls for verification.
+
+## 2026-11-24 – Pi installer smoke test
+- What: Installed Pi with Node.js 24 and npm 11 in a temporary home, repeated the install with npm offline, and checked the Node.js version gate.
+- Why: Verify installation, repeatability, and clear errors without starting an agent session.
+- Result: Both runs reported Pi 1.6.0. The old Node.js version was rejected, no Pi state or workspace files were created, and L0 execution was not tested.
+
