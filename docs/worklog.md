@@ -125,3 +125,8 @@
 - Why: The agent must run inside the unmodified L0 baseline in the isolated VM.
 - Result: VM has Node.js 24.22.3, npm 11.19.1 and Dev Containers CLI 0.91.0; the workspace service is running. Pi 1.6.0 installed; the second run was a no-op; no ~/.pi state was created. The L0 workspace mount is /workspaces/graded-containment (the experiment repo, without .git in the VM copy), so task runs need a separate per-task workspace.
 
+## 2026-11-26 – Pi login and model smoke test
+- What: Logged in to Pi 1.6.0 in the L0 container with a dedicated ChatGPT Plus account (provider openai), stored the credentials at /work/secrets/pi-auth.json (mode 600) in the VM, and sent a one-line prompt in print mode to openai/gpt-6-sol and openai/gpt-6-luna.
+- Why: Confirm that the agent can reach both models from L0 before porting the first SABER tasks.
+- Result: Both models are listed after login and returned "OK". pi auth print-bearer-token can print the OAuth token in plain text, so the agent can read its own credentials in L0 (relevant for B3).
+
