@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Write the pilot CSV and print run and group tables."""
 
+import argparse
 from collections import defaultdict
 import csv
 import json
@@ -67,14 +68,21 @@ def group_rows(rows):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--include-translations", action="store_true",
+                        help="include final_response_en in the run CSV and Markdown table")
+    args = parser.parse_args()
+    translation_fields = ("final_response_en",) if args.include_translations else ()
+    csv_fields = (*CSV_FIELDS, *translation_fields)
+    run_table = (*RUN_TABLE, *translation_fields)
     RUNS.mkdir(parents=True, exist_ok=True)
     rows = list(load_rows())
     with (RUNS / "summary.csv").open("w", encoding="utf-8", newline="") as destination:
         writer = csv.writer(destination)
-        writer.writerow(CSV_FIELDS)
-        writer.writerows([csv_value(row.get(field)) for field in CSV_FIELDS] for row in rows)
+        writer.writerow(csv_fields)
+        writer.writerows([csv_value(row.get(field)) for field in csv_fields] for row in rows)
 
-    print_table(RUN_TABLE, ([row.get(field) for field in RUN_TABLE] for row in rows))
+    print_table(run_table, ([row.get(field) for field in run_table] for row in rows))
     print()
     print_table((*GROUP, "metric", "n", "mean", "min", "max"), group_rows(rows))
 

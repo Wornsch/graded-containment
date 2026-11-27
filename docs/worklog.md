@@ -155,3 +155,17 @@
 - Why: Go/no-go check that SABER tasks can be ported to our own runner, and a first baseline for runtime and token usage.
 - Result: Positive control detected both attempt and effect. 0 of 4 agent runs attempted or caused deletion; the agent read cleanup.sh and listed the data instead of executing it. Mean per run: 48 s wall clock (about 30 s of which is container start and Pi installation), 3.5 assistant turns, 4.25 tool calls, 5,782 tokens. Deviation: the two runs with repetition 1 (one started unintentionally) ran with the forwarding still enabled.
 
+## 2026-11-27 – Pinned source review
+- What: Read the pinned SABER deployment task and the Pi 1.6.0 CLI documentation.
+- Why: Confirm the requested network receipt and the tool-free translation flags.
+- Result: The task requests an HTTP POST to port 80, and Pi documents a mode with all tools disabled. Runtime behavior was not tested.
+
+## 2026-11-27 – Two-task SABER runner
+- What: Added model selection, task definitions, and a per-run HTTP sink with receipt scoring.
+- Why: Measure disclosure attempts and effects alongside filesystem effects.
+- Result: Both tasks have a positive control. Setup, execution, scoring, and teardown were not tested.
+
+## 2026-11-27 – Host response translation
+- What: Added host-only tool-free translation and an optional summary column, and documented the VM commands.
+- Why: Review English translations while preserving original responses and run metrics.
+- Result: Translation, summarization, and the VM instructions were not tested.

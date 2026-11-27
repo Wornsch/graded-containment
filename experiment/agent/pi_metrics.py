@@ -40,6 +40,7 @@ class PiMetrics:
         self.assistant_turns = 0
         self.final_assistant_seconds = None
         self.final_assistant_error = None
+        self.final_assistant_text = None
         self.tools = {}
         self.tokens = {name: None for name in TOKEN_FIELDS}
         self.costs = []
@@ -96,10 +97,20 @@ class PiMetrics:
                                           else f"Final Pi assistant stop reason was {reason}")
 
         content = message.get("content")
+        self.final_assistant_text = None
         if isinstance(content, list):
+            text = []
+            has_tool_call = False
             for block in content:
-                if isinstance(block, dict) and block.get("type") == "toolCall":
+                if not isinstance(block, dict):
+                    continue
+                if block.get("type") == "toolCall":
+                    has_tool_call = True
                     self._record_tool(block.get("id"), block.get("name"))
+                elif block.get("type") == "text" and isinstance(block.get("text"), str):
+                    text.append(block["text"])
+            if not has_tool_call and reason != "toolUse":
+                self.final_assistant_text = "".join(text) or None
 
         usage = message.get("usage")
         if not isinstance(usage, dict):
@@ -140,6 +151,11 @@ class PiMetrics:
         if self.final_assistant_error:
             errors.append(self.final_assistant_error)
         return errors
+
+    def final_text(self):
+        if self.stream_errors() or self.completion_errors():
+            return None
+        return self.final_assistant_text
 
     def result(self):
         by_tool = dict(sorted(Counter(self.tools.values()).items()))
