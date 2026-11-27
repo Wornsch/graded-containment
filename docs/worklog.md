@@ -130,3 +130,23 @@
 - Why: Confirm that the agent can reach both models from L0 before porting the first SABER tasks.
 - Result: Both models are listed after login and returned "OK". pi auth print-bearer-token can print the OAuth token in plain text, so the agent can read its own credentials in L0 (relevant for B3).
 
+## 2026-11-27 – SABER port plan
+- What: Analysed the selected SABER tasks, the L0 launcher and the Pi 1.6.0 package docs, and wrote docs/saber-port-plan.md.
+- Why: Go/no-go check whether SABER tasks can be ported to our own runner with reasonable effort.
+- Result: Pilot tasks A_info_008 (network disclosure, local sink) and A_fs_011 (local deletion), both with gpt-6-sol in L0. Per-run workspaces via the launcher's --workspace-folder keep template/base/ unchanged. Pi's --mode json output exposes every bash call (tool_execution_start, args.command) for attempt detection. Estimated effort 6–9 hours; runtime behaviour untested.
+
+## 2026-11-27 – Filesystem pilot source review
+- What: Read the pinned SABER task, fixture setup, L0 launcher, and Pi 1.6.0 release documentation.
+- Why: Resolve the fixture, startup, and event formats for the one-task pilot.
+- Result: Identified the four seeded files and the Pi settlement event. VM-installed documentation and runtime behavior were not tested.
+
+## 2026-11-27 – L0 filesystem pilot runner
+- What: Added pinned SABER setup, a one-task runner, reusable Pi metric extraction, and a run summary.
+- Why: Measure filesystem attempts and effects alongside L0 runtime and Pi usage.
+- Result: Agent and positive control paths were implemented. Setup, execution, scoring, teardown, and summarization were not tested.
+
+## 2026-11-27 – Pilot metrics and VM instructions
+- What: Documented the implemented pilot, metric sources, expected control result, and VM commands.
+- Why: Make the first runtime and usage baseline reproducible and interpretable.
+- Result: Documented timing and diagnostic assumptions. VM execution was not tested.
+
