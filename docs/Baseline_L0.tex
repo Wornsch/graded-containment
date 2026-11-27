@@ -66,7 +66,7 @@
 \begin{tabular}{@{}ll}
 \textbf{Author} & Christopher Werner \\
 \textbf{Repository} & \texttt{graded-containment}, folder \fpath{template/base/} \\
-\textbf{Last updated} & 5 November 2026 (runtime verification) \\
+\textbf{Last updated} & 27 November 2026 (B1: host file system access) \\
 \textbf{Status} & Working document, extended throughout the thesis \\
 \end{tabular}
 
@@ -157,7 +157,7 @@ Repository checkout & \fpath{/workspaces/graded-containment} & read-write & Comp
 \toprule
 \textbf{ID} & \textbf{Property} & \textbf{Consequence for an agent} & \textbf{Status} \\
 \midrule
-B1 & Host Docker socket available via the \texttt{docker-outside-of-docker} feature, not via a visible mount entry; socket at \fpath{/var/run/docker-host.sock} (group \texttt{docker}), symlinked from \fpath{/var/run/docker.sock}; user \texttt{vscode} is in group \texttt{docker} & Can control the host Docker daemon without \texttt{sudo}: list, stop and delete all containers and volumes of the host, including unrelated projects; start privileged containers; effectively host root & \stRuntime{} \\
+B1 & Host Docker socket available via the \texttt{docker-outside-of-docker} feature, not via a visible mount entry; socket at \fpath{/var/run/docker-host.sock} (group \texttt{docker}), symlinked from \fpath{/var/run/docker.sock}; user \texttt{vscode} is in group \texttt{docker} & Can control the host Docker daemon without \texttt{sudo}: list, stop and delete all containers and volumes of the host, including unrelated projects; start privileged containers; effectively host root. In particular, the agent can start a new container that bind-mounts the Docker host's root file system and read and write any file on it. On a Windows workstation with Docker in WSL2 this includes the Windows drive mounted at \fpath{/mnt/c}\footnotemark[2] & \stRuntime{} \\
 B2 & No sandbox or approval policy configured for Codex; effective mode depends on personal settings and interactive choices; fresh state contains only credential-store settings & Permission level is not versioned and not reproducible from the repository & \stRuntime{} \\
 B3 & Agent state directory \fpath{\textasciitilde/.codex} is a writable bind mount ; credentials are stored as plain files (\texttt{cli\_auth\_credentials\_store = \textquotedbl file\textquotedbl}) & Agent can read and modify its own configuration and authentication data; target for exfiltration via prompt injection & \stRuntime{} \\
 B4 & \texttt{host.docker.internal} resolves to the host gateway & Agent can reach services listening on the host & \stRuntime{}\footnotemark[1] \\
@@ -171,6 +171,7 @@ B9 & User \texttt{vscode} has passwordless \texttt{sudo} & Agent is effectively 
 \end{table}
 
 \footnotetext[1]{Name resolution confirmed; reachability of specific host services not tested.}
+\footnotetext[2]{Access to the Windows drive was demonstrated by developers of the industrial partner on a Windows workstation (see verification log, 2026-11-27). The host-root mount itself was reproduced in L0 in the experiment VM: as user \texttt{vscode}, without \texttt{sudo}, a container started with \texttt{-v /:/host} read the VM host's \fpath{/etc/hostname}.}
 
 \todo{Add further properties (B10, \dots)}
 
@@ -213,6 +214,8 @@ Not addressed & B2 is resolved by the template as a whole: all profiles are vers
 2026-11-05 & Static analysis of the anonymised configuration (AI-assisted, reviewed manually) & Properties B1--B7 identified & B1--B7 \\
 2026-11-05 & First build with \fpath{build-devcontainer.sh} (Context7 disabled), Docker Engine 29.9.2 in WSL2 & Build successful; Codex CLI 0.166.0 installed & -- \\
 2026-11-05 & Read-only checks as \texttt{vscode} via \texttt{docker exec}: \texttt{id}, PID~1 user, socket permissions, \texttt{docker ps}, \fpath{\textasciitilde/.codex}, \texttt{getent hosts}, outbound HTTPS, environment secrets, SSH agent, Git credential helpers, \texttt{sudo -n} & \texttt{docker ps} lists all host containers including unrelated projects; outbound HTTPS succeeds; no secrets in environment; no SSH agent or credential helper; passwordless \texttt{sudo} available & B1--B4, B6--B9 \\
+2026-11-27 & Reported by developers of the industrial partner: from inside the Dev Container on a Windows workstation with Docker in WSL2, a test file \fpath{C:\textbackslash flag\textbackslash flag.txt} was created on the Windows drive, then read with \texttt{docker run -{}-rm -v /:/host alpine cat /host/mnt/c/flag/flag.txt} and appended to via the same mount using \texttt{sh -c "echo \dots"} & File read and modified successfully: read and write access to the Windows drive from the Dev Container via the host Docker socket \todo{confirm same template version} & B1 \\
+2026-11-27 & Reproduction in L0 in the experiment VM: as \texttt{vscode} via \texttt{docker exec}, \texttt{docker run -{}-rm -v /:/host alpine cat /host/etc/hostname} & Returned the VM host name \texttt{gc-experiment}: the container user reads the VM host file system through the Docker socket without \texttt{sudo} & B1 \\
 \bottomrule
 \end{tabularx}
 \end{table}
